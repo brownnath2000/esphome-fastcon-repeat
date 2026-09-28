@@ -1,5 +1,6 @@
 #include <vector>
 #include <cstdio>
+#include <string>
 #include "esphome/core/log.h"
 #include "utils.h"
 
@@ -112,14 +113,16 @@ namespace esphome
             }
         }
 
-        std::vector<char> vector_to_hex_string(std::vector<uint8_t> &data)
+        std::string vector_to_hex_string(const std::vector<uint8_t> &data)
         {
-            std::vector<char> hex_str(data.size() * 2 + 1); // Allocate the vector with the required size
+            std::string hex_str;
+            hex_str.reserve(data.size() * 2);
+            char buf[3];
             for (size_t i = 0; i < data.size(); i++)
             {
-                sprintf(hex_str.data() + (i * 2), "%02X", data[i]);
+                sprintf(buf, "%02X", data[i]);
+                hex_str.append(buf);
             }
-            hex_str[data.size() * 2] = '\0'; // Ensure null termination
             return hex_str;
         }
     } // namespace fastcon

@@ -159,9 +159,12 @@ namespace esphome
 
             if (has_white)
             {
-                return std::vector<uint8_t>({static_cast<uint8_t>(brightness)});
-                // DEBUG: when changing to white mode, this should be the payload:
-                // ff0000007f7f
+                light_data[1] = 0;
+                light_data[2] = 0;
+                light_data[3] = 0;
+                light_data[4] = 127;
+                light_data[5] = 127;
+                return light_data;
             }
 
             bool has_rgb = (static_cast<uint8_t>(color_mode) & static_cast<uint8_t>(light::ColorCapability::RGB)) != 0;
@@ -179,27 +182,34 @@ namespace esphome
                 light_data[5] = static_cast<uint8_t>(values.get_cold_white() * 255.0f);
             }
 
-            // TODO figure out if we can use these, and how
             bool has_temp = (static_cast<uint8_t>(color_mode) & static_cast<uint8_t>(light::ColorCapability::COLOR_TEMPERATURE)) != 0;
             if (has_temp)
             {
                 float temperature = values.get_color_temperature();
-                if (temperature < 153)
-                {
-                    light_data[4] = 0xff;
-                    light_data[5] = 0x00;
-                }
-                else if (temperature > 500)
+                if (temperature <= 153.0f)
                 {
                     light_data[4] = 0x00;
                     light_data[5] = 0xff;
                 }
+                else if (temperature >= 500.0f)
+                {
+                    light_data[4] = 0xff;
+                    light_data[5] = 0x00;
+                }
                 else
                 {
-                    // Linear interpolation between (153, 0xff) and (500, 0x00)
-                    light_data[4] = (uint8_t)(((500 - temperature) * 255.0f + (temperature - 153) * 0x00) / (500 - 153));
-                    light_data[5] = (uint8_t)(((temperature - 153) * 255.0f + (500 - temperature) * 0x00) / (500 - 153));
+                    // Linear interpolation: 153 mireds = cold white, 500 mireds = warm white
+                    float warm_f = ((temperature - 153.0f) * 255.0f) / (500.0f - 153.0f);
+                    light_data[4] = static_cast<uint8_t>(warm_f);
+                    light_data[5] = static_cast<uint8_t>(255.0f - warm_f);
                 }
+            }
+
+            if (!has_rgb && !has_cold_warm && !has_temp && !has_white)
+            {
+                // In brightness-only mode, set default neutral warm + cold white
+                light_data[4] = 127;
+                light_data[5] = 127;
             }
 
             return light_data;
@@ -214,8 +224,8 @@ namespace esphome
             std::copy(light_data.begin(), light_data.end(), result_data.begin() + 2);
 
             // Debug output - print payload as hex
-            auto hex_str = vector_to_hex_string(result_data).data();
-            ESP_LOGD(TAG, "Inner Payload (%d bytes): %s", result_data.size(), hex_str);
+            std::string hex_str = vector_to_hex_string(result_data);
+            ESP_LOGD(TAG, "Inner Payload (%d bytes): %s", result_data.size(), hex_str.c_str());
 
             return this->generate_command(5, light_id_, result_data, true);
         }

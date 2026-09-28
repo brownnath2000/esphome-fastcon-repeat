@@ -73,6 +73,24 @@ light:
 - **name** (*Required*, string): The name for the light entity
 - **id** (*Optional*, ID): The ID to use for this light component
 - **controller_id** (*Optional*, ID): The ID of the controller to use. Defaults to "fastcon_controller"
+- **supports_rgb** (*Optional*, boolean): Whether the light supports RGB color (aliases: `supports_colour`, `no_colour`). Defaults to `true`. Set to `false` for CCT (white color temperature only) bulbs.
+- **supports_color_temperature** (*Optional*, boolean): Whether the light supports adjustable color temperature / cold & warm white (aliases: `supports_cwww`, `supports_colour_temperature`). Defaults to `true`.
+- **supports_white** (*Optional*, boolean): Whether the light supports a dedicated white channel in RGB mode (RGBW). Defaults to `true`.
+- **supports_brightness** (*Optional*, boolean): Whether the light supports dimming/brightness. Defaults to `true`.
+- **cold_white_color_temperature** (*Optional*, color_temperature): Coldest color temperature in mireds or Kelvin. Defaults to `153 mireds` (6500K).
+- **warm_white_color_temperature** (*Optional*, color_temperature): Warmest color temperature in mireds or Kelvin. Defaults to `500 mireds` (2000K).
+
+##### Example: White Color Temperature Only (CCT) Light
+```yaml
+light:
+  - platform: fastcon
+    id: living_room_light
+    name: "Living Room Light"
+    light_id: 6
+    supports_rgb: false                 # Disables RGB color picker & presets
+    supports_color_temperature: true    # Enables white color temperature
+    default_transition_length: 0s
+```
 
 ## Finding Your Mesh Key
 
