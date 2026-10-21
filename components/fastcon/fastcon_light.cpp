@@ -34,7 +34,7 @@ namespace esphome
         light::LightTraits FastconLight::get_traits()
         {
             auto traits = light::LightTraits();
-            std::set<light::ColorMode> modes;
+            light::ColorModeMask modes;
 
             if (this->supports_rgb_)
             {
