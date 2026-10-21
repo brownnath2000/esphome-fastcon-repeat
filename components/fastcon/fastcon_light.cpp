@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <set>
 #include "esphome/core/log.h"
 #include "fastcon_light.h"
 #include "fastcon_controller.h"
@@ -98,7 +99,7 @@ namespace esphome
 
             // Debug output - print payload as hex
             std::string hex_str = vector_to_hex_string(adv_data);
-            ESP_LOGD(TAG, "Advertisement Payload (%d bytes): %s", adv_data.size(), hex_str.c_str());
+            ESP_LOGD(TAG, "Advertisement Payload (%zu bytes): %s", adv_data.size(), hex_str.c_str());
 
             // Send the advertisement repeat_count times
             for (uint8_t i = 0; i < this->controller_->get_repeat_count(); i++)

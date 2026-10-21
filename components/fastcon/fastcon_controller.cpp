@@ -3,6 +3,7 @@
 #include "esphome/components/light/color_mode.h"
 #include "fastcon_controller.h"
 #include "protocol.h"
+#include <cinttypes>
 
 namespace esphome
 {
@@ -15,7 +16,7 @@ namespace esphome
             std::lock_guard<std::mutex> lock(queue_mutex_);
             if (queue_.size() >= max_queue_size_)
             {
-                ESP_LOGW(TAG, "Command queue full (size=%d), dropping command for light %d",
+                ESP_LOGW(TAG, "Command queue full (size=%zu), dropping command for light %" PRIu32,
                          queue_.size(), light_id_);
                 return;
             }
@@ -26,7 +27,7 @@ namespace esphome
             cmd.retries = 0;
 
             queue_.push(cmd);
-            ESP_LOGV(TAG, "Command queued, queue size: %d", queue_.size());
+            ESP_LOGV(TAG, "Command queued, queue size: %zu", queue_.size());
         }
 
         void FastconController::clear_queue()
@@ -225,7 +226,7 @@ namespace esphome
 
             // Debug output - print payload as hex
             std::string hex_str = vector_to_hex_string(result_data);
-            ESP_LOGD(TAG, "Inner Payload (%d bytes): %s", result_data.size(), hex_str.c_str());
+            ESP_LOGD(TAG, "Inner Payload (%zu bytes): %s", result_data.size(), hex_str.c_str());
 
             return this->generate_command(5, light_id_, result_data, true);
         }
